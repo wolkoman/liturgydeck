@@ -3,7 +3,7 @@ const path = require('path')
 const PImage = require('pureimage')
 const streamBuffers = require('stream-buffers')
 
-PImage.registerFont(path.resolve(__dirname, 'fixtures/SourceSansPro-Regular.ttf'), 'Source Sans Pro').load();
+PImage.registerFont(path.resolve(__dirname, '../fixtures/SourceSansPro-Regular.ttf'), 'Source Sans Pro').load();
 
 
 function wrapText(context, text, x, y, maxWidth, lineHeight) {

@@ -33,18 +33,15 @@
             document.getElementById('end').play();
         }
         activeCamera = camera;
-        main.innerHTML = `Camera ${camera}`;
         document.body[camera == me ? 'setAttribute' : 'removeAttribute']('me','');
         document.body.removeAttribute('warn');
     });
     socket.on('camerawarn', (camera) => {
         camera = +camera;
-        main.innerHTML = `ME ${me}. camera ${camera}. activeCamera ${activeCamera}. warnCamera ${warnCamera}.`;
         if(camera === me && activeCamera !== me && soundAllowed){
             document.getElementById('warn').play();
         }
         warnCamera = camera;
-        //main.innerHTML = `Camera ${camera} ACHTUNG`;
         document.body[camera == me ? 'setAttribute' : 'removeAttribute']('warn','');
 
     });
@@ -54,11 +51,9 @@
         ['hi','warn','live','end'].forEach(sound => {
             document.getElementById(sound).play();
             document.getElementById(sound).pause();
-            document.getElementById(sound).onended = () =>{
-                console.log("END", sound);
-            };
         });
         document.getElementById('hi').play();
+        document.body.removeChild(document.querySelector('button'));
     }
 </script>
 <style>

@@ -1,10 +1,14 @@
-const statusPage = require('fs').readFileSync('./status.html');
-const app = require('http').createServer((req, res) => {res.write(statusPage);res.end();console.log(req.url);});
+const statusPage = require('fs').readFileSync('./public/status.html');
+const app = require('http').createServer((req, res) => {
+    res.write(statusPage);
+    res.end();
+});
 const { openStreamDeck } = require('elgato-stream-deck')
 const OBSWebSocket = require('obs-websocket-js');
 const obs = new OBSWebSocket();
 const fetch = require('node-fetch');
-const express = require('express');
+const ip = require("ip");
+const port = 8080;
 let myStreamDeck;
 
 try{
@@ -18,7 +22,8 @@ myStreamDeck.clearAllKeys();
 const io = require('socket.io')(app);
 const textgen = require("./textgen.js")(myStreamDeck);
 const image = require("./image.js")(myStreamDeck);
-app.listen(80);
+app.listen(port);
+console.log(`Camera status can be viewed on: ${ip.address()}:${port}`);
 
 const fields = {
     scenes: [0,1,2,5,6,7,10,11],
@@ -83,8 +88,8 @@ const setActiveScene = async (info) => {
     if(activeScene){
         browser = activeScene.sources.find(source => source.type === 'browser_source');
         if(browser){
-            myStreamDeck.fillImage(fields.up, await image('fixtures/left.png'));
-            myStreamDeck.fillImage(fields.down, await image('fixtures/right.png'));
+            myStreamDeck.fillImage(fields.up, await image('../fixtures/left.png'));
+            myStreamDeck.fillImage(fields.down, await image('../fixtures/right.png'));
         }else{
             myStreamDeck.fillColor(fields.up, ...Array(3).fill(150));
             myStreamDeck.fillColor(fields.down, ...Array(3).fill(150));
