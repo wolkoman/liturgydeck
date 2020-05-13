@@ -4,12 +4,13 @@ const app = require('http').createServer((req: any, res: any) => {
     res.end();
 });
 const { openStreamDeck } = require('elgato-stream-deck')
-const OBSWebSocket = require('obs-websocket-js');
+import OBSWebSocket from 'obs-websocket-js';
+import { StreamDeck } from './streamDeck';
 const obs = new OBSWebSocket();
 const fetch = require('node-fetch');
 const ip = require("ip");
 const port = 80;
-let myStreamDeck: any;
+let myStreamDeck: StreamDeck;
 
 try{
     myStreamDeck = openStreamDeck();
@@ -91,8 +92,8 @@ const setActiveScene = async (info: any) => {
             myStreamDeck.fillImage(fields.up, await image('../fixtures/left.png'));
             myStreamDeck.fillImage(fields.down, await image('../fixtures/right.png'));
         }else{
-            myStreamDeck.fillColor(fields.up, ...Array(3).fill(150));
-            myStreamDeck.fillColor(fields.down, ...Array(3).fill(150));
+            myStreamDeck.fillColor(fields.up, 150, 150, 150);
+            myStreamDeck.fillColor(fields.down, 150, 150, 150);
         }
     }
 }
@@ -126,8 +127,10 @@ myStreamDeck.on('up', (keyIndex: number) => {
                 warnCameraIndex = -1;
                 cameraScene.sources
                     .filter((source: any, i: number) => i !== activeCameraIndex)
-                    .forEach((source: any) => obs.send('SetSceneItemProperties', {item: source.name,"scene-name":"KAMERA", visible: false}).catch(console.log));
-                obs.send('SetSceneItemProperties', {item: cameraScene.sources[activeCameraIndex].name,"scene-name":"KAMERA", visible: true});
+                    //@ts-ignore
+                    .forEach((source: any) => obs.send('SetSceneItemProperties', {item: source.name as string,"scene-name":"KAMERA", visible: false}).catch(console.log));
+                //@ts-ignore
+                obs.send('SetSceneItemProperties', {item: cameraScene.sources[activeCameraIndex].name as string,"scene-name":"KAMERA", visible: true});
                 io.emit('camera', activeCameraIndex);
             }else{
                 warnCameraIndex = fields.camera.findIndex(i => i === keyIndex);
