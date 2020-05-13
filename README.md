@@ -8,5 +8,5 @@ This software should make controlling a livestream easier through automatically 
 
 - Install NodeJS
 - Download this repository
-- Install all dependencies with npm i
-- Execute the program with npm run start
+- Install all dependencies with `npm i`
+- Execute the program with `npm run start`
