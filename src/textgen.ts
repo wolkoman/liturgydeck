@@ -6,7 +6,7 @@ const streamBuffers = require('stream-buffers')
 PImage.registerFont(path.resolve(__dirname, '../fixtures/SourceSansPro-Regular.ttf'), 'Source Sans Pro').load();
 
 
-function wrapText(context, text, x, y, maxWidth, lineHeight) {
+function wrapText(context: any, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
     var words = text.split(' ');
     var line = '';
 
@@ -27,7 +27,7 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
     context.fillText(line, x, y);
   }
 
-module.exports = (streamDeck) => async (textString, style = 0) => {
+module.exports = (streamDeck: any) => async (textString: string, style = 0) => {
 
     const img = PImage.make(streamDeck.ICON_SIZE, streamDeck.ICON_SIZE)
     const ctx = img.getContext('2d');
