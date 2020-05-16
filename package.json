@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.17.6",
+    "@types/socket.io": "^2.1.4",
     "elgato-stream-deck": "^3.3.0",
+    "express": "^4.17.1",
     "ip": "^1.1.5",
     "node-fetch": "^2.6.0",
     "obs-websocket-js": "^4.0.1",

@@ -1,16 +1,14 @@
-const statusPage = require('fs').readFileSync('./public/status.html');
-const app = require('http').createServer((req: any, res: any) => {
-    res.write(statusPage);
-    res.end();
-});
-const { openStreamDeck } = require('elgato-stream-deck')
 import OBSWebSocket from 'obs-websocket-js';
 import { StreamDeck } from './streamDeck';
-const obs = new OBSWebSocket();
+import textgenFile from './textgen';
+import imageFile from './image';
+import { WebServer } from './webserver';
+
+const { openStreamDeck } = require('elgato-stream-deck')
 const fetch = require('node-fetch');
-const ip = require("ip");
-const port = 80;
+const obs = new OBSWebSocket();
 let myStreamDeck: StreamDeck;
+let webServer = new WebServer(80);
 
 try{
     myStreamDeck = openStreamDeck();
@@ -18,13 +16,9 @@ try{
     console.log("Error connecting to StreamDeck");
     process.exit();
 }
-myStreamDeck.clearAllKeys();
 
-const io = require('socket.io')(app);
-const textgen = require("./textgen.ts")(myStreamDeck);
-const image = require("./image.ts")(myStreamDeck);
-app.listen(port);
-console.log(`Camera status can be viewed on: ${ip.address()}:${port}`);
+const textgen = textgenFile(myStreamDeck);
+const image = imageFile(myStreamDeck);
 
 const fields = {
     scenes: [0,1,2,5,6,7,10,11],
@@ -33,6 +27,8 @@ const fields = {
     down: 4,
     nextPage: 12,
 };
+
+myStreamDeck.clearAllKeys();
 const fieldsDown = Array(myStreamDeck.NUM_KEYS).fill(0);
 let scenes: any[] = [], activeCameraIndex = 0, warnCameraIndex = 0, cameraScene: any, activeScene: any, currentPage = 0;
 
@@ -110,9 +106,9 @@ myStreamDeck.on('down', (keyIndex: number) => {
             setActiveScene({sceneName: scenes[sceneIndex].name});
         }
     }else if(keyIndex === fields.up && browser){
-        io.emit('keydown', {key: 'ArrowUp'});
+        webServer.emitBrowserSource('ArrowUp');
     }else if(keyIndex === fields.down && browser){
-        io.emit('keydown', {key: 'ArrowDown'});
+        webServer.emitBrowserSource('ArrowDown');
     }else if(keyIndex === fields.nextPage){
         nextPage();
     }
@@ -131,11 +127,10 @@ myStreamDeck.on('up', (keyIndex: number) => {
                     .forEach((source: any) => obs.send('SetSceneItemProperties', {item: source.name as string,"scene-name":"KAMERA", visible: false}).catch(console.log));
                 //@ts-ignore
                 obs.send('SetSceneItemProperties', {item: cameraScene.sources[activeCameraIndex].name as string,"scene-name":"KAMERA", visible: true});
-                io.emit('camera', activeCameraIndex);
+                webServer.setActiveCamera(activeCameraIndex);
             }else{
                 warnCameraIndex = fields.camera.findIndex(i => i === keyIndex);
-                fetch('https://liturgy.wolko.at/camera/warn/' + warnCameraIndex);
-                io.emit('camerawarn', warnCameraIndex);
+                webServer.setWarnCamera(activeCameraIndex);
             }
             renderCamera();
         }

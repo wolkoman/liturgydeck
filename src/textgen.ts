@@ -27,7 +27,7 @@ function wrapText(context: any, text: string, x: number, y: number, maxWidth: nu
     context.fillText(line, x, y);
   }
 
-module.exports = (streamDeck: any) => async (textString: string, style = 0) => {
+export default (streamDeck: any) => async (textString: string, style = 0) => {
 
     const img = PImage.make(streamDeck.ICON_SIZE, streamDeck.ICON_SIZE)
     const ctx = img.getContext('2d');

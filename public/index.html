@@ -20,7 +20,7 @@
 <script>
     var socket = io();
     var main = document.querySelector("main");
-    var me = +location.href.split('/').reverse()[0];
+    var me = +location.href.split('#').reverse()[0];
     var activeCamera, warnCamera;
     let soundAllowed = false;
 
