@@ -1,74 +1,78 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"
+  integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo="
+  crossorigin="anonymous"
+></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<button onclick="activateSound()">Sound</button>
-<main>
-</main>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<button onclick="activateSound()" id="sound">Sound</button>
+<main></main>
 <audio id="hi">
-    <source src="https://liturgy.wolko.at/res/hi.mp3">
+  <source src="https://liturgy.wolko.at/res/hi.mp3" />
 </audio>
 <audio id="live">
-    <source src="https://liturgy.wolko.at/res/live.mp3">
+  <source src="https://liturgy.wolko.at/res/live.mp3" />
 </audio>
 <audio id="warn">
-    <source src="https://liturgy.wolko.at/res/warn.mp3">
+  <source src="https://liturgy.wolko.at/res/warn.mp3" />
 </audio>
 <audio id="end">
-    <source src="https://liturgy.wolko.at/res/end.mp3">
+  <source src="https://liturgy.wolko.at/res/end.mp3" />
 </audio>
 
 <script>
-    var socket = io();
-    var main = document.querySelector("main");
-    var me = +location.href.split('#').reverse()[0];
-    var activeCamera, warnCamera;
-    let soundAllowed = false;
+  var socket = io();
+  var main = document.querySelector("main");
+  var me = +location.href.split("#").reverse()[0];
+  var activeCamera, warnCamera;
+  let soundAllowed = false;
 
-    socket.on('camera', (camera) => {
-        camera = +camera;
-        console.log(me,camera,activeCamera,soundAllowed);
-        if(camera === me && activeCamera !== me && soundAllowed){
-            document.getElementById('live').play();
-        }else if(camera !== me && activeCamera === me && soundAllowed){
-            document.getElementById('end').play();
-        }
-        activeCamera = camera;
-        document.body[camera == me ? 'setAttribute' : 'removeAttribute']('me','');
-        document.body.removeAttribute('warn');
-    });
-    socket.on('camerawarn', (camera) => {
-        camera = +camera;
-        if(camera === me && activeCamera !== me && soundAllowed){
-            document.getElementById('warn').play();
-        }
-        warnCamera = camera;
-        document.body[camera == me ? 'setAttribute' : 'removeAttribute']('warn','');
-
-    });
-
-    var activateSound = () => {
-        soundAllowed = true;
-        ['hi','warn','live','end'].forEach(sound => {
-            document.getElementById(sound).play();
-            document.getElementById(sound).pause();
-        });
-        document.getElementById('hi').play();
-        document.body.removeChild(document.querySelector('button'));
+  socket.on("camera", (camera) => {
+    camera = +camera;
+    console.log(me, camera, activeCamera, soundAllowed);
+    if (camera === me && activeCamera !== me && soundAllowed) {
+      document.getElementById("live").play();
+    } else if (camera !== me && activeCamera === me && soundAllowed) {
+      document.getElementById("end").play();
     }
+    activeCamera = camera;
+    document.body[camera == me ? "setAttribute" : "removeAttribute"]("me", "");
+    document.body.removeAttribute("warn");
+  });
+  socket.on("camerawarn", (camera) => {
+    camera = +camera;
+    if (camera === me && activeCamera !== me && soundAllowed) {
+      document.getElementById("warn").play();
+    }
+    warnCamera = camera;
+    document.body[camera == me ? "setAttribute" : "removeAttribute"](
+      "warn",
+      ""
+    );
+  });
+
+  var activateSound = () => {
+    soundAllowed = true;
+    ["hi", "warn", "live", "end"].forEach((sound) => {
+      document.getElementById(sound).play();
+      document.getElementById(sound).pause();
+    });
+    document.getElementById("hi").play();
+    document.body.removeChild(document.getElementById("sound"));
+  };
 </script>
 <style>
-    body{
-        padding: 20px;
-        font-family: sans-serif;
-        background:black;
-        color:white;
-        font-weight: bold;
-    }
-    body[warn]{
-        background:rgb(109, 109, 0);
-    }
-    body[me]{
-        background:darkred;
-    }
-
+  body {
+    padding: 20px;
+    font-family: sans-serif;
+    background: black;
+    color: white;
+    font-weight: bold;
+  }
+  body[warn] {
+    background: rgb(109, 109, 0);
+  }
+  body[me] {
+    background: darkred;
+  }
 </style>

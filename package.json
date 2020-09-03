@@ -4,8 +4,7 @@
   "description": "Controls OBS scenes and camera with the help of the Elgato Streamdeck. Control the OBS-integrated browser by connecting to the socket.io-server.",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "start:dev": "nodemon"
+    "start": "nodemon"
   },
   "author": "",
   "license": "ISC",
