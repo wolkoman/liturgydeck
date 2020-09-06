@@ -49,8 +49,8 @@ obs.on("SwitchScenes", (data: any) => setActiveScene(data));
 
 const updateScenes = () => {
   obs.send("GetSceneList").then((info: any) => {
-    scenes = info.scenes.map((scene: number, id: number) => ({
-      ...(scene as any),
+    scenes = info.scenes.map((scene: any, id: number) => ({
+      ...scene,
       id,
     }));
     cameraScene = scenes.find((scene) => scene.name === CAMERA_SCENE_NAME);
@@ -176,7 +176,6 @@ myStreamDeck.on("up", (keyIndex: number) => {
         warnCameraIndex = -1;
         cameraScene.sources
           .filter((source: any, i: number) => i !== activeCameraIndex)
-          //@ts-ignore
           .forEach((source: any) =>
             obs
               .send("SetSceneItemProperties", {

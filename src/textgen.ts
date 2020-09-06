@@ -1,5 +1,3 @@
-import { SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG } from "constants";
-
 const sharp = require("sharp");
 const path = require("path");
 const PImage = require("pureimage");
