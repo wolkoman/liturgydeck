@@ -3,6 +3,7 @@ import { StreamDeck } from "./streamDeck";
 import textgenFile, { TextgenType } from "./textgen";
 import imageFile from "./image";
 import { WebServer } from "./webserver";
+import { initAtem } from "./atem";
 
 const { openStreamDeck } = require("elgato-stream-deck");
 const fetch = require("node-fetch");
@@ -12,6 +13,13 @@ let webServer = new WebServer(80);
 
 const CAMERA_SCENE_NAME = "KAMERA";
 const AUDIO_SCENE_NAME = "TON";
+
+try {
+  initAtem(webServer);
+} catch (e) {
+  console.log("Error connecting to Atem");
+  process.exit();
+}
 
 try {
   myStreamDeck = openStreamDeck();
@@ -25,7 +33,6 @@ const image = imageFile(myStreamDeck);
 
 const fields = {
   scenes: [0, 1, 2, 5, 6, 7, 10, 11],
-  camera: [8, 9],
   up: 3,
   down: 4,
   nextPage: 12,
@@ -34,9 +41,6 @@ const fields = {
 myStreamDeck.clearAllKeys();
 const fieldsDown = Array(myStreamDeck.NUM_KEYS).fill(0);
 let scenes: any[] = [],
-  activeCameraIndex = 0,
-  warnCameraIndex = 0,
-  cameraScene: any,
   activeScene: any,
   currentPage = 0;
 
@@ -53,8 +57,6 @@ const updateScenes = () => {
       ...scene,
       id,
     }));
-    cameraScene = scenes.find((scene) => scene.name === CAMERA_SCENE_NAME);
-    renderCamera();
     renderNext();
     renderPage(currentPage);
   });
@@ -76,31 +78,6 @@ const renderPage = (page: number) => {
         0
       )
     );
-};
-const renderCamera = () => {
-  if (cameraScene) {
-    Array(fields.camera.length - cameraScene.sources.length)
-      .fill(0)
-      .forEach((x, i) =>
-        myStreamDeck.fillColor(
-          fields.camera[fields.camera.length - 1 - i],
-          0,
-          0,
-          0
-        )
-      );
-    cameraScene.sources.forEach(async (source: any, i: number) =>
-      myStreamDeck.fillImage(
-        fields.camera[i],
-        await textgen(
-          "CAMERA " + source.name,
-          TextgenType.CAMERA,
-          activeCameraIndex === i,
-          warnCameraIndex === i
-        )
-      )
-    );
-  }
 };
 const renderScene = async (scene: any) => {
   let fieldIndex = scene.id - currentPage * fields.scenes.length;
@@ -166,40 +143,7 @@ myStreamDeck.on("down", (keyIndex: number) => {
     nextPage();
   }
 });
-myStreamDeck.on("up", (keyIndex: number) => {
-  if (fields.camera.includes(keyIndex)) {
-    let time = new Date().getTime() - fieldsDown[keyIndex];
 
-    if (cameraScene && cameraScene.sources.length > activeCameraIndex) {
-      if (time < 200) {
-        activeCameraIndex = fields.camera.findIndex((i) => i === keyIndex);
-        warnCameraIndex = -1;
-        cameraScene.sources
-          .filter((source: any, i: number) => i !== activeCameraIndex)
-          .forEach((source: any) =>
-            obs
-              .send("SetSceneItemProperties", {
-                item: source.name as string,
-                ["scene-name"]: CAMERA_SCENE_NAME,
-                visible: false,
-              } as any)
-              .catch(console.log)
-          );
-        //@ts-ignore
-        obs.send("SetSceneItemProperties", {
-          item: cameraScene.sources[activeCameraIndex].name as string,
-          "scene-name": CAMERA_SCENE_NAME,
-          visible: true,
-        });
-        webServer.setActiveCamera(activeCameraIndex);
-      } else {
-        warnCameraIndex = fields.camera.findIndex((i) => i === keyIndex);
-        webServer.setWarnCamera(activeCameraIndex);
-      }
-      renderCamera();
-    }
-  }
-});
 myStreamDeck.on("error", (error: string) => {
   console.error(error);
 });

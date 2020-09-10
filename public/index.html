@@ -3,62 +3,74 @@
   integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo="
   crossorigin="anonymous"
 ></script>
-<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<button onclick="activateSound()" id="sound">Sound</button>
-<main></main>
+<div id="configure">
+  <p>Register as</p>
+  <button onclick="register(1)">Camera 1</button>
+  <button onclick="register(2)">Camera 2</button>
+  <button onclick="register(3)">Camera 3</button>
+</div>
+<main>
+  <div id="camera"></div>
+  <div id="state"></div>
+</main>
 <audio id="hi">
-  <source src="https://liturgy.wolko.at/res/hi.mp3" />
+  <source src="/hi.mp3" />
 </audio>
 <audio id="live">
-  <source src="https://liturgy.wolko.at/res/live.mp3" />
+  <source src="/live.mp3" />
 </audio>
 <audio id="warn">
-  <source src="https://liturgy.wolko.at/res/warn.mp3" />
+  <source src="/warn.mp3" />
 </audio>
 <audio id="end">
-  <source src="https://liturgy.wolko.at/res/end.mp3" />
+  <source src="/end.mp3" />
 </audio>
 
 <script>
   var socket = io();
   var main = document.querySelector("main");
-  var me = +location.href.split("#").reverse()[0];
-  var activeCamera, warnCamera;
-  let soundAllowed = false;
+  var me = 0,
+    state = 0;
 
-  socket.on("camera", (camera) => {
-    camera = +camera;
-    console.log(me, camera, activeCamera, soundAllowed);
-    if (camera === me && activeCamera !== me && soundAllowed) {
-      document.getElementById("live").play();
-    } else if (camera !== me && activeCamera === me && soundAllowed) {
-      document.getElementById("end").play();
+  socket.on("update", ({ program, preview }) => {
+    if (program === me && state !== 2) {
+      state = 2;
+      play("live");
+      setState("program");
+    } else if (preview === me && state !== 1) {
+      state = 1;
+      play("warn");
+      setState("preview");
+    } else if (preview !== me && program !== me && state !== 0) {
+      state = 0;
+      play("end");
+      setState("OFF");
     }
-    activeCamera = camera;
-    document.body[camera == me ? "setAttribute" : "removeAttribute"]("me", "");
-    document.body.removeAttribute("warn");
-  });
-  socket.on("camerawarn", (camera) => {
-    camera = +camera;
-    if (camera === me && activeCamera !== me && soundAllowed) {
-      document.getElementById("warn").play();
-    }
-    warnCamera = camera;
-    document.body[camera == me ? "setAttribute" : "removeAttribute"](
-      "warn",
-      ""
-    );
   });
 
+  const setState = (state) => {
+    document.body.className = state;
+    document.getElementById("state").innerHTML = state.toUpperCase();
+  };
+  const register = (camera) => {
+    me = camera;
+    activateSound();
+    document.body.removeChild(document.getElementById("configure"));
+    document.documentElement.requestFullscreen(document.documentElement);
+    document.getElementById("camera").innerHTML = "CAMERA " + camera;
+  };
+  const play = (soundName) => {
+    document.getElementById(soundName).play();
+  };
   var activateSound = () => {
     soundAllowed = true;
     ["hi", "warn", "live", "end"].forEach((sound) => {
       document.getElementById(sound).play();
       document.getElementById(sound).pause();
     });
-    document.getElementById("hi").play();
-    document.body.removeChild(document.getElementById("sound"));
+    play("hi");
   };
 </script>
 <style>
@@ -67,12 +79,21 @@
     font-family: sans-serif;
     background: black;
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #camera {
+    font-size: 25px;
+  }
+  #state {
+    font-size: 40px;
     font-weight: bold;
   }
-  body[warn] {
-    background: rgb(109, 109, 0);
+  body.preview {
+    background: darkgreen;
   }
-  body[me] {
-    background: darkred;
+  body.program {
+    background: red;
   }
 </style>
