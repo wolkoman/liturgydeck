@@ -49,6 +49,17 @@
       setState("OFF");
     }
   });
+  socket.on("tell", ({ text, camera }) => {
+    console.log({ text, camera });
+    if (camera && camera !== me) return;
+    var speech = new SpeechSynthesisUtterance(text);
+    speech.volume = 1;
+    speech.rate = 0.8;
+    speech.pitch = 1;
+    speech.lang = "de";
+    speechSynthesis.speak(speech);
+    speechSynthesis.speak(speech);
+  });
 
   const setState = (state) => {
     document.body.className = state;
@@ -62,7 +73,10 @@
     document.getElementById("camera").innerHTML = "CAMERA " + camera;
   };
   const play = (soundName) => {
-    document.getElementById(soundName).play();
+    let sound = document.getElementById(soundName);
+    sound.currentTime = 0;
+    sound.volume = 0.8;
+    sound.play();
   };
   var activateSound = () => {
     soundAllowed = true;

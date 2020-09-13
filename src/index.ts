@@ -14,6 +14,15 @@ let webServer = new WebServer(80);
 const CAMERA_SCENE_NAME = "KAMERA";
 const AUDIO_SCENE_NAME = "TON";
 
+var stdin = process.openStdin();
+
+stdin.addListener("data", function (d) {
+  let msg = d.toString().trim();
+  let camera = +msg.split(" ")[0];
+  let isCamera = [1, 2, 3].includes(camera);
+  webServer.tell(isCamera ? msg.substring(2) : msg, camera);
+});
+
 try {
   initAtem(webServer);
 } catch (e) {

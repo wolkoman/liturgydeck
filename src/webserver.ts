@@ -17,16 +17,13 @@ export class WebServer {
     console.log(`Camera status can be viewed on: ${ip.address()}:${port}`);
   }
 
-  setProgram(index: number) {
-    this.socket.emit("program", index);
-  }
-  setPreview(index: number) {
-    this.socket.emit("preview", index);
-  }
   updateCameras(program: number, preview: number) {
     this.socket.emit("update", { program, preview });
   }
   emitBrowserSource(key: "ArrowUp" | "ArrowDown") {
     this.socket.emit("keydown", { key });
+  }
+  tell(text: string, camera?: number) {
+    this.socket.emit("tell", { text, camera });
   }
 }
