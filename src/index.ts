@@ -41,9 +41,9 @@ const textgen = textgenFile(myStreamDeck);
 const image = imageFile(myStreamDeck);
 
 const fields = {
-  scenes: [0, 1, 2, 5, 6, 7, 10, 11],
-  up: 3,
-  down: 4,
+  scenes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  up: 13,
+  down: 14,
   nextPage: 12,
 };
 
