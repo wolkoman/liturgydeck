@@ -20,8 +20,11 @@ export class WebServer {
   updateCameras(program: number, preview: number) {
     this.socket.emit("update", { program, preview });
   }
-  emitBrowserSource(key: "ArrowUp" | "ArrowDown") {
+  emitBrowserSourceKeyDown(key: "ArrowUp" | "ArrowDown") {
     this.socket.emit("keydown", { key });
+  }
+  emitBrowserSourceKeyUp(key: "ArrowUp" | "ArrowDown") {
+    this.socket.emit("keyup", { key });
   }
   tell(text: string, camera?: number) {
     this.socket.emit("tell", { text, camera });

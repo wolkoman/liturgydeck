@@ -145,11 +145,18 @@ myStreamDeck.on("down", (keyIndex: number) => {
       setActiveScene({ sceneName: scenes[sceneIndex].name });
     }
   } else if (keyIndex === fields.up && browser) {
-    webServer.emitBrowserSource("ArrowUp");
+    webServer.emitBrowserSourceKeyDown("ArrowUp");
   } else if (keyIndex === fields.down && browser) {
-    webServer.emitBrowserSource("ArrowDown");
+    webServer.emitBrowserSourceKeyDown("ArrowDown");
   } else if (keyIndex === fields.nextPage) {
     nextPage();
+  }
+});
+myStreamDeck.on("up", (keyIndex: number) => {
+  if (keyIndex === fields.up && browser) {
+    webServer.emitBrowserSourceKeyUp("ArrowUp");
+  } else if (keyIndex === fields.down && browser) {
+    webServer.emitBrowserSourceKeyUp("ArrowDown");
   }
 });
 
