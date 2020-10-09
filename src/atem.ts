@@ -1,6 +1,6 @@
 import { WebServer } from "./webserver";
 
-const ip = "192.168.8.240";
+const ip = "192.168.0.240";
 var Atem = require("atem");
 
 export const initAtem = (webServer: WebServer) => {

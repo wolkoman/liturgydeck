@@ -39,7 +39,7 @@
       state = 2;
       play("live");
       setState("program");
-    } else if (preview === me && state !== 1) {
+    } else if (preview === me && state !== 1 && program !== me) {
       state = 1;
       play("warn");
       setState("preview");
