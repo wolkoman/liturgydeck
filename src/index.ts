@@ -3,13 +3,13 @@ import { StreamDeck } from "./streamDeck";
 import textgenFile, { TextgenType } from "./textgen";
 import imageFile from "./image";
 import { WebServer } from "./webserver";
-import { initAtem } from "./atem";
 
 const { openStreamDeck } = require("elgato-stream-deck");
-const fetch = require("node-fetch");
 const obs = new OBSWebSocket();
 let myStreamDeck: StreamDeck;
 let webServer = new WebServer(80);
+let cameraStatus = { program: 0, preview: 0 };
+let cameraScene: any;
 
 const CAMERA_SCENE_NAME = "KAMERA";
 const AUDIO_SCENE_NAME = "TON";
@@ -24,13 +24,6 @@ stdin.addListener("data", function (d) {
 });
 
 try {
-  initAtem(webServer);
-} catch (e) {
-  console.log("Error connecting to Atem");
-  process.exit();
-}
-
-try {
   myStreamDeck = openStreamDeck();
 } catch (e) {
   console.log("Error connecting to StreamDeck");
@@ -41,7 +34,8 @@ const textgen = textgenFile(myStreamDeck);
 const image = imageFile(myStreamDeck);
 
 const fields = {
-  scenes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  scenes: [0, 1, 2, 3, 5, 6, 7, 8, 10, 11],
+  cameras: [4,9],
   up: 13,
   down: 14,
   nextPage: 12,
@@ -66,7 +60,9 @@ const updateScenes = () => {
       ...scene,
       id,
     }));
+    cameraScene = scenes.find((scene) => scene.name === CAMERA_SCENE_NAME)
     renderNext();
+    renderCameras();
     renderPage(currentPage);
   });
 };
@@ -107,6 +103,13 @@ const renderNext = async () => {
     await textgen("NEXT", TextgenType.NEXT)
   );
 };
+const renderCameras = async () => {
+  fields.cameras.forEach(async (cameraField, index) => 
+    myStreamDeck.fillImage(
+    cameraField,
+    await textgen("Kamera " + index, TextgenType.CAMERA, index === cameraStatus.program, index === cameraStatus.preview)
+  ));
+};
 let browser: any;
 const setActiveScene = async (info: any) => {
   let lastActiveScene = activeScene;
@@ -144,6 +147,25 @@ myStreamDeck.on("down", (keyIndex: number) => {
       obs.send("SetCurrentScene", { "scene-name": scenes[sceneIndex].name });
       setActiveScene({ sceneName: scenes[sceneIndex].name });
     }
+  } else if (fields.cameras.includes(keyIndex)) {
+    const cameraIndex = fields.cameras.indexOf(keyIndex);
+    if(cameraStatus.preview === cameraIndex){
+      cameraStatus.program = cameraIndex;
+      cameraScene.sources
+          .forEach((source: any, index: number) =>
+            obs
+              .send("SetSceneItemProperties", {
+                item: source.name as string,
+                ["scene-name"]: CAMERA_SCENE_NAME,
+                visible: index === cameraStatus.program,
+              } as any)
+              .catch(console.log)
+          );
+    }else{
+      cameraStatus.preview = cameraIndex;
+    }
+    webServer.updateCameras(cameraStatus.program, cameraStatus.preview);
+    renderCameras();
   } else if (keyIndex === fields.up && browser) {
     webServer.emitBrowserSourceKeyDown("ArrowUp");
   } else if (keyIndex === fields.down && browser) {

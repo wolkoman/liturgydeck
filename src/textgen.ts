@@ -60,7 +60,7 @@ export default (streamDeck: any) => async (
     wrapText(ctx, "SCENE", 2, 16, 60, 15, active ? "#000000" : "#aaaaaa");
     wrapText(ctx, textString, 2, 30, 60, 16, active ? "#000000" : "#ffffff");
   } else if (type === TextgenType.CAMERA) {
-    ctx.fillStyle = active ? "red" : warn ? "#ffff00" : "black";
+    ctx.fillStyle = active ? "red" : warn ? "#00ff00" : "black";
     ctx.fillRect(0, 0, streamDeck.ICON_SIZE, streamDeck.ICON_SIZE);
     const border = 6;
     ctx.globalAlpha = 0.5;
